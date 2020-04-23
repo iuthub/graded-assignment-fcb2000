@@ -13,6 +13,46 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+Route::get('/',function () {
     return view('blog.index');
+})->name('blog.index')->middleware(['unauth','dislogin']);
+
+Route::group([
+    'prefix' => 'admin',
+    'middleware'=>'auth'
+], function() {
+    Route::get('', [
+        'uses' => 'TaskController@getAdminIndex',
+        'as' => 'admin.index'
+    ]);
+
+
+    Route::post('', [
+        'uses' => 'TaskController@taskCreate',
+        'as' => 'admin.create'
+    ]);
+
+    Route::get('edit/{id}', [
+        'uses' => 'TaskController@getAdminEdit',
+        'as' => 'admin.edit'
+    ]);
+
+    Route::get('delete/{id}', [
+        'uses' => 'TaskController@getAdminDelete',
+        'as' => 'admin.delete'
+    ]);
+
+    Route::post('edit', [
+        'uses' => 'TaskController@taskAdminUpdate',
+        'as' => 'admin.update'
+    ]);
 });
+
+Auth::routes();
+
+//Override login route
+Route::get('login', function () {
+    return redirect()->route('blog.index');
+})->name('login');
+
+//Route::get('/home', 'HomeController@index')->name('home');
